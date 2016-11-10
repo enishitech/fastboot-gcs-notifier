@@ -4,16 +4,22 @@ function getLastModified(gcs, bucketName, fileName) {
   return gcs.bucket(bucketName).file(fileName).getMetadata().then(([{timeCreated}]) => timeCreated);
 }
 
-function poll(ui, gcs, bucketName, fileName, pollTime, currentLastModified, notify) {
+function schedulePoll(pollTime, currentLastModified, ...args) {
+  setTimeout(() => {
+    poll(currentLastModified, ...args).then((newLastModified) => {
+      schedulePoll(pollTime, newLastModified, ...args);
+    });
+  }, pollTime);
+}
+
+function poll(currentLastModified, ui, gcs, bucketName, fileName, notify) {
   return getLastModified(gcs, bucketName, fileName).then((newLastModified) => {
     if (currentLastModified !== newLastModified) {
       ui.writeLine(`config modified; old=${currentLastModified}; new=${newLastModified}`);
       notify();
     }
 
-    setTimeout(() => {
-      poll(ui, gcs, bucketName, fileName, pollTime, newLastModified, notify);
-    }, pollTime);
+    return newLastModified;
   });
 }
 
@@ -27,7 +33,7 @@ class GCSNotifier {
 
   subscribe(notify) {
     return getLastModified(this.gcs, this.bucket, this.key).then((lastModified) => {
-      poll(this.ui, this.gcs, this.bucket, this.key, this.pollTime, lastModified, notify);
+      schedulePoll(this.pollTime, lastModified, this.ui, this.gcs, this.bucket, this.key, notify);
     });
   }
 }
