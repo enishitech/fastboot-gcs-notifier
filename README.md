@@ -6,6 +6,7 @@ const GCSNotifier = require('fastboot-gcs-notifier');
 const downloader = new GCSDownloader({
   bucket: 'bucket-name',        // required
   key: 'path/to/dist-xxxx.zip', // required
+  poll: 10 * 1000,              // optional; default: 3000 (in milliseconds)
   authentication: {             // optional; see below
     projectId: 'project-id',
     keyFilename: 'path/to/key'
