@@ -1,0 +1,25 @@
+{
+  "name": "fastboot-gcs-notifier",
+  "version": "0.0.0",
+  "description": "A FastBoot App Server notifier for Google Cloud Storage",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/ursm/fastboot-s3-notifier.git",
+    "type": "git"
+  },
+  "author": "Keita Urashima <ursm@ursm.jp>",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 6"
+  },
+  "scripts": {
+    "test": "eslint ."
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^0.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.9.1",
+    "eslint-plugin-node": "^3.0.3"
+  }
+}
