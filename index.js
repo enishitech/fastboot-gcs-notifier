@@ -1,7 +1,7 @@
 const storage = require('@google-cloud/storage');
 
-function getLastModified(gcs, bucketName, fileName) {
-  return gcs.bucket(bucketName).file(fileName).getMetadata().then(([{timeCreated}]) => timeCreated);
+function getLastModified(file) {
+  return file.getMetadata().then(([{timeCreated}]) => timeCreated);
 }
 
 function schedulePoll(pollTime, currentLastModified, ...args) {
@@ -12,8 +12,8 @@ function schedulePoll(pollTime, currentLastModified, ...args) {
   }, pollTime);
 }
 
-function poll(currentLastModified, ui, gcs, bucketName, fileName, notify) {
-  return getLastModified(gcs, bucketName, fileName).then((newLastModified) => {
+function poll(currentLastModified, ui, file, notify) {
+  return getLastModified(file).then((newLastModified) => {
     if (currentLastModified !== newLastModified) {
       ui.writeLine(`config modified; old=${currentLastModified}; new=${newLastModified}`);
       notify();
@@ -24,16 +24,18 @@ function poll(currentLastModified, ui, gcs, bucketName, fileName, notify) {
 }
 
 class GCSNotifier {
-  constructor({bucket, key, poll, authentication} = {}) {
-    this.bucket   = bucket;
-    this.key      = key;
-    this.pollTime = poll || 3 * 1000;
-    this.gcs      = storage(authentication);
+  constructor({bucket, key, authentication, poll} = {}) {
+    this.bucket         = bucket;
+    this.key            = key;
+    this.authentication = authentication;
+    this.pollTime       = poll || 3 * 1000;
   }
 
   subscribe(notify) {
-    return getLastModified(this.gcs, this.bucket, this.key).then((lastModified) => {
-      schedulePoll(this.pollTime, lastModified, this.ui, this.gcs, this.bucket, this.key, notify);
+    const file = storage(this.authentication).bucket(this.bucket).file(this.key);
+
+    return getLastModified(file).then((lastModified) => {
+      schedulePoll(this.pollTime, lastModified, this.ui, file, notify);
     });
   }
 }
