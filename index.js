@@ -26,7 +26,7 @@ function poll(currentLastModified, ui, file, notify) {
 class GCSNotifier {
   constructor({bucket, key, authentication, poll} = {}) {
     this.bucket         = bucket;
-    this.key            = key;
+    this.key            = key || 'fastboot-deploy-info.json';
     this.authentication = authentication;
     this.pollTime       = poll || 3 * 1000;
   }
