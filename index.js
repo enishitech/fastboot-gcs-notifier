@@ -1,4 +1,4 @@
-const storage = require('@google-cloud/storage');
+const {Storage} = require('@google-cloud/storage');
 
 function getLastModified(file) {
   return file.getMetadata().then(([{timeCreated}]) => timeCreated);
@@ -32,7 +32,7 @@ class GCSNotifier {
   }
 
   subscribe(notify) {
-    const file = storage(this.authentication).bucket(this.bucket).file(this.key);
+    const file = new Storage(this.authentication).bucket(this.bucket).file(this.key);
 
     return getLastModified(file).then((lastModified) => {
       schedulePoll(this.pollTime, lastModified, this.ui, file, notify);
